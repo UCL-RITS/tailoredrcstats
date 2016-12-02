@@ -44,11 +44,11 @@ def usage(users, db, start, stop):
     # Dump output.
     output = cursor.fetchall()
 
-    print(output)
-
     # Tidy up.
     cursor.close()
     conn.close()
+
+    return output[0]['sum((ru_wallclock*cost))']
 
 # Routine to get all the nodes in the inventory.
 def getallnodes():
@@ -78,8 +78,6 @@ def getallnodes():
     # Dump output.
     output = cursor.fetchall()
 
-    #print(output)
-
     # Tidy up.
     cursor.close()
     conn.close()
@@ -97,5 +95,5 @@ if __name__ == "__main__":
     print(allnodes)
 
     #print(nodes)
-    usage(users = ["uccaoke", "cceahke"], db = "sgelogs2", start = "2015-01-01 00:00:01", stop = "2016-01-01 00:00:00")
-    
+    u = usage(users = ["uccaoke", "cceahke"], db = "sgelogs2", start = "2015-01-01 00:00:01", stop = "2016-01-01 00:00:00")
+    print(u)
