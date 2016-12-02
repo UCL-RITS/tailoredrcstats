@@ -8,7 +8,7 @@ Needs a plain text list of users and a plain text list of nodes.
 ```
 $ python3 stats.py --help
 usage: stats.py [-h] [-u user list] [-n node list] [-d database]
-                [-b start date] [-e end date] [-p prefix] [-t]                                                                                                                 
+                [-b start date] [-e end date] [-p prefix] [-t]
 
 Generate usage reports.
 
