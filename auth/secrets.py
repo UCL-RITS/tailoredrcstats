@@ -5,12 +5,12 @@
 class Secrets:
     def __init__(self):
         import configparser
-        from os.path import expanduser
+        import os.path
 
-        filename = expanduser("~") + "/.stats_secrets/accounts"
+        self.filename = os.path.join(os.path.expanduser("~"), ".stats_secrets", "accounts")
 
         secretconfig = configparser.ConfigParser()
-        secretconfig.read(filename)
+        secretconfig.read(self.filename)
 
         self.dbuser = secretconfig.get("database", "user").strip("'")
         self.dbpasswd = secretconfig.get("database", "pass").strip("")
