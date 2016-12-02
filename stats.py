@@ -4,10 +4,6 @@
   Owain Kenway
 '''
 
-# Constants.
-mysqlhost = "mysql.external.legion.ucl.ac.uk"
-mysqlport = 3306
-
 # Generate a valid SQL list from a python one.
 def sqllist(pylist):
     sqlstr="("
@@ -18,10 +14,8 @@ def sqllist(pylist):
     sqlstr = sqlstr + ")"
     return sqlstr
 
-# Get usage for list of users from database name db between 
-# start and stop.
-# if nodes = "*" then all nodes.
-def usage(users, db, start, stop, nodes = "*"):
+# Perform an SQL query on a particular DB and return results.
+def dbquery(db, query, mysqlhost="mysql.external.legion.ucl.ac.uk", mysqlport = 3306 ):
     from auth.secrets import Secrets
     import MySQLdb   # Note need mysql connector > 2.0
 
@@ -35,6 +29,25 @@ def usage(users, db, start, stop, nodes = "*"):
                            passwd=s.dbpasswd,
                            db=db)
 
+    # Set up cursor.
+    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+
+    # Run query.
+    cursor.execute(query)
+
+    # Dump output.
+    output = cursor.fetchall()
+
+    # Tidy up.
+    cursor.close()
+    conn.close()
+
+    return output
+
+# Get usage for list of users from database name db between 
+# start and stop.
+# if nodes = "*" then all nodes.
+def usage(users, db, start, stop, nodes = "*"):
     userlist = sqllist(users)
 
     # Construct our query.
@@ -49,18 +62,8 @@ def usage(users, db, start, stop, nodes = "*"):
 
     print(query)
 
-    # Set up cursor.
-    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
-
-    # Run query.
-    cursor.execute(query)
-
     # Dump output.
-    output = cursor.fetchall()
-
-    # Tidy up.
-    cursor.close()
-    conn.close()
+    output = dbquery(db=db, query=query)
 
     return output[0]['sum((ru_wallclock*cost))']
 
