@@ -8,6 +8,16 @@
 mysqlhost = "mysql.external.legion.ucl.ac.uk"
 mysqlport = 3306
 
+# Generate a valid SQL list from a python one.
+def sqllist(pylist):
+    sqlstr="("
+    for a in pylist:
+        if sqlstr!= "(":
+            sqlstr = sqlstr + ", "
+        sqlstr = sqlstr + "'" + a + "'"
+    sqlstr = sqlstr + ")"
+    return sqlstr
+
 # Get usage for list of users from database name db between 
 # start and stop.
 # if nodes = "*" then all nodes.
@@ -25,23 +35,15 @@ def usage(users, db, start, stop, nodes = "*"):
                            passwd=s.dbpasswd,
                            db=db)
 
-    userlist = ""
-    for a in users:
-        if userlist != "":
-            userlist = userlist + ", "
-        userlist = userlist + "'" + a + "'"
+    userlist = sqllist(users)
 
     # Construct our query.
-    query = "select sum((ru_wallclock*cost)) from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) and owner in (" + userlist + ") " 
+    query = "select sum((ru_wallclock*cost)) from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) and owner in " + userlist
     
     # if nodes != * then construct a node list.
     if nodes != "*":
-        nodelist = ""
-        for a in nodes:
-            if nodelist != "":
-                nodelist = nodelist + ", "
-            nodelist = nodelist + "'" + a + "'"
-        query = query + " and where hostname in ('" + nodelist *"')"
+        nodelist = sqllist(nodes)
+        query = query + " and where hostname in " + nodelist + ")"
 
     query = query + ");"
 
