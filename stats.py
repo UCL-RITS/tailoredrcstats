@@ -50,7 +50,52 @@ def usage(users, db, start, stop):
     cursor.close()
     conn.close()
 
+# Routine to get all the nodes in the inventory.
+def getallnodes():
+    from auth.secrets import Secrets
+    import MySQLdb   # Note need mysql connector > 2.0
+
+    # Set up our authentication.
+    s = Secrets()
+
+    # Connect to database.
+    conn = MySQLdb.Connect(host=mysqlhost,
+                           port=mysqlport,
+                           user=s.dbuser,
+                           passwd=s.dbpasswd,
+                           db="sysadmin")
+
+    # Construct our query.
+    query = "select hostname from sysadmin.inventory"
+    print(query)
+
+    # Set up cursor.
+    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+
+    # Run query.
+    cursor.execute(query)
+
+    # Dump output.
+    output = cursor.fetchall()
+
+    #print(output)
+
+    # Tidy up.
+    cursor.close()
+    conn.close()
+
+    return output
+
 # Main so something happens if we run this script directly.    
 if __name__ == "__main__":
     print("Testing DB connection")
+    nodedict = getallnodes()
+    allnodes = []
+    for a in nodedict:
+        allnodes.append(a['hostname'])
+
+    print(allnodes)
+
+    #print(nodes)
     usage(users = ["uccaoke", "cceahke"], db = "sgelogs2", start = "2015-01-01 00:00:01", stop = "2016-01-01 00:00:00")
+    
