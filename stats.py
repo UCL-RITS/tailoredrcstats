@@ -99,11 +99,31 @@ def activeuserreport(db, start, stop, users = "*", nodes = "*", filename="active
     f.write("Period, Active users from subset, Total active users\n")
 
     for a in dates:
-        print(date2str(a["start"]) + " ... " + date2str(a["stop"]))
+        print("User report for " + date2str(a["start"]) + " ... " + date2str(a["stop"]))
         period = str(a["start"].year) + "-" + str(a["start"].month)
         num = len(activeusers(db, date2str(a["start"]), date2str(a["stop"]), users=users, nodes=nodes))
         tnum = len(activeusers(db, date2str(a["start"]), date2str(a["stop"]), users="*", nodes=nodes))
         f.write(period + "," + str(num) + "," + str(tnum) + "\n")
+
+    f.close()
+
+# Report on active users, monthly, in range start - stop.
+def usagereport(db, start, stop, users = "*", nodes = "*", filename="usage.csv"):
+    dates = gendates(start,stop)
+
+    f = open(filename, "w")
+    f.write("Period, Usage by subset of users, Total usage\n")
+
+    for a in dates:
+        print("Usage report for " + date2str(a["start"]) + " ... " + date2str(a["stop"]))
+        period = str(a["start"].year) + "-" + str(a["start"].month)
+        su = usage(db, date2str(a["start"]), date2str(a["stop"]), users=users, nodes=nodes)
+        u = usage(db, date2str(a["start"]), date2str(a["stop"]), users="*", nodes=nodes)
+        if type(su) == type(None):
+            su = 0
+        if type(u) == type(None):
+            u = 0
+        f.write(period + "," + str(su) + "," + str(u) + "\n")
 
     f.close()
 
@@ -125,7 +145,6 @@ def gendates(start, stop):
     # We need to generate fractional months for first and last month.
 
     currentdate = dtstart
-    print (monthinc(dtstop))
     while monthincflat(currentdate) < dtstop:
         qdatestart = currentdate
         qdateend = monthincflat(currentdate)
@@ -214,3 +233,4 @@ if __name__ == "__main__":
         print(nu)
     else: 
         activeuserreport(users = users, db = db, start = start, stop = stop, filename=prefix+"_active_users.csv")
+        usagereport(users = users, db = db, start = start, stop = stop, filename=prefix+"_usage.csv")
