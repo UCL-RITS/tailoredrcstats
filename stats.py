@@ -94,7 +94,18 @@ def activeusers(db, start, stop, users = "*", nodes = "*"):
 # Report on active users, monthly, in range start - stop.
 def activeuserreport(db, start, stop, users = "*", nodes = "*", filename="active_users.csv"):
     dates = gendates(start,stop)
-    print(dates)
+
+    f = open(filename, "w")
+    f.write("Period, Active users from subset, Total active users\n")
+
+    for a in dates:
+        print(date2str(a["start"]) + " ... " + date2str(a["stop"]))
+        period = str(a["start"].year) + "-" + str(a["start"].month)
+        num = len(activeusers(db, date2str(a["start"]), date2str(a["stop"]), users=users, nodes=nodes))
+        tnum = len(activeusers(db, date2str(a["start"]), date2str(a["stop"]), users="*", nodes=nodes))
+        f.write(period + "," + str(num) + "," + str(tnum) + "\n")
+
+    f.close()
 
 # Generate date ranges:
 def gendates(start, stop):
@@ -148,13 +159,19 @@ def flatmonth(date):
     import datetime
     return datetime.datetime(date.year, date.month, 1,0,0,0)
 
+def date2str(date):
+    import datetime
+
+    f = "%Y-%m-%d %H:%M:%S"
+    return date.strftime(f) 
+
 # Main so something happens if we run this script directly.    
 if __name__ == "__main__":
 
     import argparse
 
     # Some default values
-    prefix="test_"
+    prefix="test"
     users = "*"
     db = "sgelogs2"
     nodes = "*"
