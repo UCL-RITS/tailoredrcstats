@@ -8,9 +8,9 @@
 mysqlhost = "mysql.external.legion.ucl.ac.uk"
 mysqlport = 3306
 
-# Get usage for list of users from database name db on nodes list nodes between 00:00:00 on start and
-# 23:59:59 on end.
-def usage(users, db, nodes, start, stop):
+# Get usage for list of users from database name db between 
+# start and stop.
+def usage(users, db, start, stop):
     from auth.secrets import Secrets
     import MySQLdb   # Note need mysql connector > 2.0
 
@@ -24,7 +24,33 @@ def usage(users, db, nodes, start, stop):
                            passwd=s.dbpasswd,
                            db=db)
 
+    userlist = ""
+    for a in users:
+        if userlist != "":
+            userlist = userlist + ", "
+        userlist = userlist + "'" + a + "'"
+
+    # Construct our query.
+    query = "select sum((ru_wallclock*cost)) from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) and owner in (" + userlist + "));"
+
+    print(query)
+
+    # Set up cursor.
+    cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+
+    # Run query.
+    cursor.execute(query)
+
+    # Dump output.
+    output = cursor.fetchall()
+
+    print(output)
+
+    # Tidy up.
+    cursor.close()
+    conn.close()
+
 # Main so something happens if we run this script directly.    
 if __name__ == "__main__":
     print("Testing DB connection")
-    usage(["uccaoke"], "sgelogs", "test", 1,1)
+    usage(users = ["uccaoke", "cceahke"], db = "sgelogs2", start = "2015-01-01 00:00:01", stop = "2016-01-01 00:00:00")
