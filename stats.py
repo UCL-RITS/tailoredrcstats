@@ -91,6 +91,63 @@ def activeusers(db, start, stop, users = "*", nodes = "*"):
         active.add(a["owner"])
     return list(active)
 
+# Report on active users, monthly, in range start - stop.
+def activeuserreport(db, start, stop, users = "*", nodes = "*", filename="active_users.csv"):
+    dates = gendates(start,stop)
+    print(dates)
+
+# Generate date ranges:
+def gendates(start, stop):
+    import dateutil
+    from dateutil.parser import parse
+    import datetime
+
+    ret = []
+
+    # convert to datetime so that we can do date math.
+    dtstart = dateutil.parser.parse(start)
+    dtstop = dateutil.parser.parse(stop)
+
+    # Right - this is where the old stats code went terribly wrong.
+    # In this code, start is an absolute value.
+    # AS IS STOP.
+    # We need to generate fractional months for first and last month.
+
+    currentdate = dtstart
+    print (monthinc(dtstop))
+    while monthincflat(currentdate) < dtstop:
+        qdatestart = currentdate
+        qdateend = monthincflat(currentdate)
+        if qdateend == flatmonth(dtstop):
+            qdateend = dtstop
+        dr = dict()
+        dr["start"] = qdatestart
+        dr["stop"] = qdateend
+        ret.append(dr)
+        currentdate = monthincflat(currentdate)
+
+    return ret
+
+# Increment dates by a month.
+def monthinc(date):
+    import datetime
+
+    newyear = date.year
+    newmonth = date.month + 1
+    if newmonth == 13:
+        newyear = newyear + 1
+        newmonth = 1
+
+    return datetime.datetime(newyear, newmonth, date.day, date.hour, date.minute, date.second)
+
+def monthincflat(date):
+    import datetime
+    return monthinc(datetime.datetime(date.year, date.month, 1,0,0,0))
+    
+def flatmonth(date):
+    import datetime
+    return datetime.datetime(date.year, date.month, 1,0,0,0)
+
 # Main so something happens if we run this script directly.    
 if __name__ == "__main__":
 
@@ -111,6 +168,7 @@ if __name__ == "__main__":
     parser.add_argument('-b', metavar='start date', type=str, help="Start date [YYYY-MM-DD hh:mm:ss]")
     parser.add_argument('-e', metavar='end date', type=str, help="End date [YYYY-MM-DD hh:mm:ss]")
     parser.add_argument('-p', metavar='prefix', type=str, help="Prefix for report files")
+    parser.add_argument('-t', action='store_true', help="Do a quick test run instead of a report.")
 
     options = parser.parse_args()
 
@@ -132,7 +190,10 @@ if __name__ == "__main__":
     if (options.p != None):
         prefix = options.p
 
-    u = usage(users = users, db = db, start = start, stop = stop)
-    nu = activeusers(users = users, db = db, start = start, stop = stop)
-    print(u)
-    print(nu)
+    if (options.t):
+        u = usage(users = users, db = db, start = start, stop = stop)
+        nu = activeusers(users = users, db = db, start = start, stop = stop)
+        print(u)
+        print(nu)
+    else: 
+        activeuserreport(users = users, db = db, start = start, stop = stop, filename=prefix+"_active_users.csv")
