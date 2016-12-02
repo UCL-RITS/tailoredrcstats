@@ -1,7 +1,8 @@
-# This class lets us keep the user ids and passwords outside of the git repo.
-# This is basically a port of the equivalent I added to Bruno's old stats code.
-# Owain Kenway
-
+'''
+  This class lets us keep the user ids and passwords outside of the git repo.
+  This is basically a port of the equivalent I added to Bruno's old stats code.
+  Owain Kenway
+'''
 class Secrets:
     def __init__(self):
         import configparser
