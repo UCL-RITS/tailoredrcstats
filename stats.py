@@ -44,21 +44,44 @@ def dbquery(db, query, mysqlhost="mysql.external.legion.ucl.ac.uk", mysqlport = 
 
     return output
 
-# Get usage for list of users from database name db between 
-# start and stop.
-# if nodes = "*" then all nodes.
-def usage(users, db, start, stop, nodes = "*"):
-    userlist = sqllist(users)
+# Build owner/node limit string for queries
+def onlimits(users="*", nodes="*"):
+    query = ""
 
-    # Construct our query.
-    query = "select sum((ru_wallclock*cost)) from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) and owner in " + userlist
-    
+    # if users != * then construct a node list.
+    if users != "*":
+        userlist = sqllist(users)
+        query = query + " and owner in " + userlist
+
     # if nodes != * then construct a node list.
     if nodes != "*":
         nodelist = sqllist(nodes)
-        query = query + " and where hostname in " + nodelist + ")"
+        query = query + " and where hostname in " + nodelist
 
-    query = query + ");"
+    return query
+
+# Get usage for list of users from database name db between 
+# start and stop.
+# if nodes = "*" then all nodes.
+def usage(db, start, stop, users="*", nodes = "*"):
+
+    # Construct our query.
+    query = "select sum((ru_wallclock*cost)) from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) " + onlimits(users=users, nodes=nodes) + ");"
+
+    print(query)
+
+    # Dump output.
+    output = dbquery(db=db, query=query)
+
+    return output[0]['sum((ru_wallclock*cost))']
+
+# Get active users for list of users from database name db between 
+# start and stop.
+# if nodes = "*" then all nodes.
+def activeusers(db, start, stop, users = "*", nodes = "*"):
+
+    # Construct our query.
+    query = "select sum((ru_wallclock*cost)) from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) " + onlimits(users=users, nodes=nodes) + ");"
 
     print(query)
 
