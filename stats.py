@@ -95,9 +95,18 @@ def activeusers(db, start, stop, users = "*", nodes = "*"):
 
 # Main so something happens if we run this script directly.    
 if __name__ == "__main__":
-    print("Testing DB connection")
 
-    u = usage(users = ["uccaoke", "cceahke"], db = "sgelogs2", start = "2015-01-01 00:00:01", stop = "2016-01-01 00:00:00")
-    nu = activeusers(users = ["uccaoke", "cceahke"], db = "sgelogs2", start = "2015-01-01 00:00:01", stop = "2016-01-01 00:00:00")
+    # Some default values
+    prefix="test_"
+    users = ["uccaoke", "cceahke"]
+    #users = "*"
+    db = "sgelogs2"
+    nodes = "*"
+    start = "2015-01-01 00:00:01"
+    stop = "2016-01-01 00:00:00"
+
+
+    u = usage(users = users, db = db, start = start, stop = stop)
+    nu = activeusers(users = users, db = db, start = start, stop = stop)
     print(u)
     print(nu)
