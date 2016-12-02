@@ -73,7 +73,7 @@ def usage(db, start, stop, users="*", nodes = "*"):
     # Dump output.
     output = dbquery(db=db, query=query)
 
-    return output[0]['sum((ru_wallclock*cost))']
+    return output[0]["sum((ru_wallclock*cost))"]
 
 # Get active users for list of users from database name db between 
 # start and stop.
@@ -81,18 +81,23 @@ def usage(db, start, stop, users="*", nodes = "*"):
 def activeusers(db, start, stop, users = "*", nodes = "*"):
 
     # Construct our query.
-    query = "select sum((ru_wallclock*cost)) from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) " + onlimits(users=users, nodes=nodes) + ");"
+    query = "select owner from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) " + onlimits(users=users, nodes=nodes) + ");"
 
     print(query)
 
     # Dump output.
     output = dbquery(db=db, query=query)
 
-    return output[0]['sum((ru_wallclock*cost))']
+    active = set()
+    for a in output:
+        active.add(a["owner"])
+    return list(active)
 
 # Main so something happens if we run this script directly.    
 if __name__ == "__main__":
     print("Testing DB connection")
 
     u = usage(users = ["uccaoke", "cceahke"], db = "sgelogs2", start = "2015-01-01 00:00:01", stop = "2016-01-01 00:00:00")
+    nu = activeusers(users = ["uccaoke", "cceahke"], db = "sgelogs2", start = "2015-01-01 00:00:01", stop = "2016-01-01 00:00:00")
     print(u)
+    print(nu)
