@@ -17,7 +17,7 @@ def sqllist(pylist):
 # Perform an SQL query on a particular DB and return results.
 def dbquery(db, query, mysqlhost="mysql.external.legion.ucl.ac.uk", mysqlport = 3306 ):
     from auth.secrets import Secrets
-    import MySQLdb   # Note need mysql connector > 2.0
+    import MySQLdb   # Note need mysqlclient package from pypi
 
     # Set up our authentication.
     s = Secrets()
