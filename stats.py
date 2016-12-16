@@ -58,7 +58,7 @@ def onlimits(users="*", nodes="*"):
     # if nodes != * then construct a node list.
     if nodes != "*":
         nodelist = sqllist(nodes)
-        query = query + " and where hostname in " + nodelist
+        query = query + " and hostname in " + nodelist
 
     return query
 
@@ -227,10 +227,10 @@ if __name__ == "__main__":
         prefix = options.p
 
     if (options.t):
-        u = usage(users = users, db = db, start = start, stop = stop)
-        nu = activeusers(users = users, db = db, start = start, stop = stop)
+        u = usage(users = users, db = db, start = start, stop = stop, nodes = nodes)
+        nu = activeusers(users = users, db = db, start = start, stop = stop, nodes = nodes)
         print(u)
         print(nu)
     else: 
-        activeuserreport(users = users, db = db, start = start, stop = stop, filename=prefix+"_active_users.csv")
-        usagereport(users = users, db = db, start = start, stop = stop, filename=prefix+"_usage.csv")
+        activeuserreport(users = users, db = db, start = start, stop = stop, filename=prefix+"_active_users.csv", nodes = nodes)
+        usagereport(users = users, db = db, start = start, stop = stop, filename=prefix+"_usage.csv", nodes = nodes)
