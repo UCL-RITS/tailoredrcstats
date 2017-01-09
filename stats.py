@@ -148,25 +148,17 @@ def usagereport(db, start, stop, users = "*", nodes = "*", filename="usage.csv")
 # This gets departments from the user_depts table.
 def deptreports(db, start, stop, filename="depreport.csv"):
 
-    # Acquire department list.
-    query = "select distinct department from user_depts;"
-    depts = dbquery(db = "user_info", query = query)
+    query = "select user_info.user_depts.department,sum((ru_wallclock*cost)) from " + db + ".accounting inner join user_info.user_depts on "
+    query = query + db + ".accounting.owner=user_info.user_depts.username where ((end_time > unix_timestamp('" + start + "')) " 
+    query = query + "and (end_time < unix_timestamp('" + stop + "'))) group by user_info.user_depts.department;"
 
-    # Convert into a list.
-    deptlist = []
-    for a in depts:
-        deptlist.append(a["department"])
-    print(deptlist)
+    results = dbquery(db = db, query = query)
 
     f = open(filename, "w")
     f.write("Department, usage (s)\n")
-    for b in deptlist:
-        query = "select sum((ru_wallclock*cost)) from " + db + ".accounting inner join user_info.user_depts on " + db + ".accounting.owner=user_info.user_depts.username where (user_info.user_depts.department = '" + b + "'"
-        query = query + " and (end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')));"
-        u = dbquery(db = db, query = query)[0]['sum((ru_wallclock*cost))']
-        if type(u) == type(None):
-            u = 0
-        f.write(b + "," + str(u))
+    for i in results:
+        f.write(i['department'] + "," + str(i['sum((ru_wallclock*cost))']) + "\n")
+
     f.close()
 
 # Generate date ranges:
