@@ -7,11 +7,14 @@
 # Generate a valid SQL list from a python one.
 def sqllist(pylist):
     sqlstr="("
-    for a in pylist:
-        if sqlstr!= "(":
-            sqlstr = sqlstr + ", "
-        sqlstr = sqlstr + "'" + a + "'"
-    sqlstr = sqlstr + ")"
+    if type(pylist) == str:
+        sqlstr = sqlstr + "'" + pylist + "')"
+    else:
+        for a in pylist:
+            if sqlstr!= "(":
+                sqlstr = sqlstr + ", "
+            sqlstr = sqlstr + "'" + a + "'"
+        sqlstr = sqlstr + ")"
     return sqlstr
 
 # Perform an SQL query on a particular DB and return results.
@@ -104,6 +107,20 @@ def activeuserreport(db, start, stop, users = "*", nodes = "*", filename="active
         num = len(activeusers(db, date2str(a["start"]), date2str(a["stop"]), users=users, nodes=nodes))
         tnum = len(activeusers(db, date2str(a["start"]), date2str(a["stop"]), users="*", nodes=nodes))
         f.write(period + "," + str(num) + "," + str(tnum) + "\n")
+
+    f.close()
+
+# Report on total usage for each user in time period.
+def peruserreport(db, start, stop, users = "*", nodes = "*", filename="peruser_usage.csv"):
+
+    f = open(filename, "w")
+    f.write("User id, Total usage in compute seconds between " + start + " and " + stop + "\n")
+
+    for a in users:
+        u = usage(db = db, start = start, stop = stop, users = a, nodes=nodes)
+        if type(u) == type(None):
+            u = 0
+        f.write(a + "," + str(u) + "\n")
 
     f.close()
 
@@ -205,6 +222,7 @@ if __name__ == "__main__":
     parser.add_argument('-e', metavar='end date', type=str, help="End date [YYYY-MM-DD hh:mm:ss]")
     parser.add_argument('-p', metavar='prefix', type=str, help="Prefix for report files")
     parser.add_argument('-t', action='store_true', help="Do a quick test run instead of a report.")
+    parser.add_argument('-r', action='store_true', help="Do a per user usage report instead of normal report.")
 
     options = parser.parse_args()
 
@@ -231,6 +249,8 @@ if __name__ == "__main__":
         nu = activeusers(users = users, db = db, start = start, stop = stop, nodes = nodes)
         print(u)
         print(nu)
+    elif (options.r):
+        peruserreport(db = db, start = start, stop = stop, users = users, nodes = nodes, filename=prefix+"_peruser_usage.csv")
     else: 
         activeuserreport(users = users, db = db, start = start, stop = stop, filename=prefix+"_active_users.csv", nodes = nodes)
         usagereport(users = users, db = db, start = start, stop = stop, filename=prefix+"_usage.csv", nodes = nodes)
