@@ -144,6 +144,31 @@ def usagereport(db, start, stop, users = "*", nodes = "*", filename="usage.csv")
 
     f.close()
 
+# Break down of usage by department.
+def deptreports(db, start, stop, filename="depreport.csv"):
+
+    # Acquire department list.
+    query = "select distinct department from user_depts;"
+    depts = dbquery(db = "user_info", query = query)
+
+    # Convert into a list.
+    deptlist = []
+    for a in depts:
+        deptlist.append(a["department"])
+    print(deptlist)
+
+    f = open(filename, "w")
+    f.write("Department, usage (s)\n")
+    for b in deptlist:
+        query = "select sum((ru_wallclock*cost)) from " + db + ".accounting inner join user_info.user_depts on " + db + ".accounting.owner=user_info.user_depts.username where (user_info.user_depts.department = '" + b + "'"
+        query = query + " and (end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')));"
+        u = dbquery(db = db, query = query)[0]['sum((ru_wallclock*cost))']
+        if type(u) == type(None):
+            u = 0
+        f.write(b + "," + str(u))
+        print(u)
+    f.close()
+
 # Generate date ranges:
 def gendates(start, stop):
     import dateutil
@@ -223,6 +248,7 @@ if __name__ == "__main__":
     parser.add_argument('-p', metavar='prefix', type=str, help="Prefix for report files")
     parser.add_argument('-t', action='store_true', help="Do a quick test run instead of a report.")
     parser.add_argument('-r', action='store_true', help="Do a per user usage report instead of normal report.")
+    parser.add_argument('-x', action='store_true', help="Departmental report.")
 
     options = parser.parse_args()
 
@@ -251,6 +277,8 @@ if __name__ == "__main__":
         print(nu)
     elif (options.r):
         peruserreport(db = db, start = start, stop = stop, users = users, nodes = nodes, filename=prefix+"_peruser_usage.csv")
+    elif (options.x):
+        deptreports(db = db, start = start, stop = stop, filename = prefix+'_depreport.csv')
     else: 
         activeuserreport(users = users, db = db, start = start, stop = stop, filename=prefix+"_active_users.csv", nodes = nodes)
         usagereport(users = users, db = db, start = start, stop = stop, filename=prefix+"_usage.csv", nodes = nodes)
