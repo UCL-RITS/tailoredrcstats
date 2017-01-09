@@ -145,6 +145,7 @@ def usagereport(db, start, stop, users = "*", nodes = "*", filename="usage.csv")
     f.close()
 
 # Break down of usage by department.
+# This gets departments from the user_depts table.
 def deptreports(db, start, stop, filename="depreport.csv"):
 
     # Acquire department list.
@@ -166,7 +167,6 @@ def deptreports(db, start, stop, filename="depreport.csv"):
         if type(u) == type(None):
             u = 0
         f.write(b + "," + str(u))
-        print(u)
     f.close()
 
 # Generate date ranges:
