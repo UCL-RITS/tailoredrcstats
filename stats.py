@@ -70,8 +70,12 @@ def onlimits(users="*", nodes="*"):
 # if nodes = "*" then all nodes.
 def usage(db, start, stop, users="*", nodes = "*"):
 
+    import simpletemplate as st
+
+    keys = {'%DB%':db, '%START%':start, '%STOP%':stop, '%ONLIMITS%':onlimits(users=users, nodes=nodes)}
+
     # Construct our query.
-    query = "select sum((ru_wallclock*cost)) from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) " + onlimits(users=users, nodes=nodes) + ");"
+    query = st.templatefile(filename="sql/usage.sql", keys=keys)
 
     # Dump output.
     output = dbquery(db=db, query=query)
@@ -83,8 +87,12 @@ def usage(db, start, stop, users="*", nodes = "*"):
 # if nodes = "*" then all nodes.
 def activeusers(db, start, stop, users = "*", nodes = "*"):
 
+    import simpletemplate as st
+
+    keys = {'%DB%':db, '%START%':start, '%STOP%':stop, '%ONLIMITS%':onlimits(users=users, nodes=nodes)}
+
     # Construct our query.
-    query = "select owner from " + db + ".accounting where ((end_time > unix_timestamp('" + start +  "')) and (end_time < unix_timestamp('" + stop + "')) " + onlimits(users=users, nodes=nodes) + ");"
+    query = st.templatefile(filename="sql/activeusers.sql", keys=keys)
 
     # Dump output.
     output = dbquery(db=db, query=query)
@@ -147,10 +155,11 @@ def usagereport(db, start, stop, users = "*", nodes = "*", filename="usage.csv")
 # Break down of usage by department.
 # This gets departments from the user_depts table.
 def deptreports(db, start, stop, filename="depreport.csv"):
+    import simpletemplate as st
 
-    query = "select user_info.user_depts.department,sum((ru_wallclock*cost)) from " + db + ".accounting inner join user_info.user_depts on "
-    query = query + db + ".accounting.owner=user_info.user_depts.username where ((end_time > unix_timestamp('" + start + "')) " 
-    query = query + "and (end_time < unix_timestamp('" + stop + "'))) group by user_info.user_depts.department;"
+    keys = {'%DB%':db, '%START%':start, '%STOP%':stop}
+
+    query = st.templatefile(filename="sql/deptreport.sql", keys=keys)
 
     results = dbquery(db = db, query = query)
 

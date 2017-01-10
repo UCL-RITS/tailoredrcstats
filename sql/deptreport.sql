@@ -1,0 +1,2 @@
+select user_info.user_depts.department,sum((ru_wallclock*cost)) from %DB%.accounting inner join user_info.user_depts on %DB%.accounting.owner=user_info.user_depts.username where 
+((end_time > unix_timestamp('%START%')) and (end_time < unix_timestamp('%STOP%'))) group by user_info.user_depts.department;
