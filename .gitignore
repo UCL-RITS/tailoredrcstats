@@ -1,6 +1,7 @@
 # Data sets
 farr/
 *.csv
+output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
