@@ -164,9 +164,9 @@ def deptreports(db, start, stop, filename="depreport.csv"):
     results = dbquery(db = db, query = query)
 
     f = open(filename, "w")
-    f.write("Department, usage (s)\n")
+    f.write("Department| usage (s)\n")
     for i in results:
-        f.write(i['department'] + "," + str(i['sum((ru_wallclock*cost))']) + "\n")
+        f.write(i['department'] + "|" + str(i['sum((ru_wallclock*cost))']) + "\n")
 
     f.close()
 
